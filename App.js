@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import MessageQueueSpy from './MessageQueueSpy';
 
-import { useEffect } from 'react';
+MessageQueueSpy.start();
 
 const App: () => Node = () => {
   const {sum} = NativeModules.MyMathModule;
@@ -28,14 +28,7 @@ const App: () => Node = () => {
   const [spying, setSpying] = useState<boolean>(true);
   const [result, setResult] = useState<number|string>('');
   const [batteryPercentage, setBatteryPercentage] = useState<number|string>('');
-
-  useEffect(()=>{
-    MessageQueueSpy.start();
-
-    return () => {
-      MessageQueueSpy.stop();
-    }
-  }, []);
+  const [count, setCount] = useState<number>(0);
 
   const onAddition = () => {
     sum(4,5)
@@ -57,34 +50,54 @@ const App: () => Node = () => {
     });
   }
 
+  const incrementCount = () => {
+    setCount(count+1);
+  }
+
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <View style={{justifyContent: "center", alignItems: "center", flex: 1}}>
-        <Text style={styles.batteryText}>React Native Bridge Demonstration</Text>
-        <View style={{height: 30}} />
-        <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity style={{backgroundColor: spying ? 'green': 'red', padding: 20}}  onPress={toggleSpy}>
-            <Text style={styles.sectionTitle}>{spying ? 'Stop Spying' : 'Start Spying'}</Text>
-          </TouchableOpacity>
-          <View style={{width: 20}} />
-          <TouchableOpacity style={{padding: 20, backgroundColor: 'grey'}} onPress={() => MessageQueueSpy.log()}>
-            <Text>Show Queue Logs</Text>
-          </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+        <Text style={styles.heading}>React Native Bridge Demonstration</Text>
+        <View style={{height: 100}} />
+        <View style={styles.flexedContainer}>
+          <View style={styles.horizontalContainer}>
+            <TouchableOpacity style={[styles.touchable, {backgroundColor: spying ? 'green': 'red'}]}  onPress={toggleSpy}>
+              <Text style={styles.sectionTitle}>{spying ? 'Stop Spying' : 'Start Spying'}</Text>
+            </TouchableOpacity>
+            <View style={{width: 20}} />
+            <TouchableOpacity style={styles.touchable} onPress={() => MessageQueueSpy.log()}>
+              <Text>Show Queue Logs</Text>
+            </TouchableOpacity>
+          </View>
+        <View style={{height: 40}} />
+
+        <View style={{alignItems: 'center', justifyContent: 'center'}}>
+          <Text style={styles.countText}>{count}</Text>
+          <View style={{height: 20}} />
+          <Button onPress={incrementCount} title={'Increase Count'} />
+        </View>
         </View>
         <View style={{height: 20}} />
-        <Button onPress={onAddition} title={'Adds 4 & 5'} />
-        <View style={{height: 20}} />
-        <Text style={styles.sectionDescription}>4+5={result}</Text>
-        <View style={{height: 20}} />
-        <Button onPress={onBatteryStatusButtonClicked} title={'Show Battery Percentage'} />
-        <View style={{height: 20}} />
-        <Text style={styles.batteryText}>Battery: {batteryPercentage} %</Text>
-      </View>
+        <View style={styles.flexedContainer}>
+          <Text style={styles.batteryText}>Custom Native Modules</Text>
+          <View style={{height: 20}} />
+          <Button onPress={onAddition} title={'Natively Adds 4 & 5'} />
+          <View style={{height: 20}} />
+          <Text style={styles.sectionDescription}>4+5={result}</Text>
+          <View style={{height: 20}} />
+          <Button onPress={onBatteryStatusButtonClicked} title={'Show Battery Percentage'} />
+          <View style={{height: 20}} />
+          <Text style={styles.batteryText}>Battery: {batteryPercentage} %</Text>
+        </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {flex: 1, paddingVertical: 30},
+  heading: {fontSize: 30, textAlign: 'center', fontWeight: 'bold'},
+  flexedContainer: {flex: 1, padding: 16},
+  horizontalContainer: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
+  countText: {fontSize: 28, fontWeight: 'bold'},
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -99,6 +112,10 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center'
+  },
+  touchable: {
+    padding: 20,
+    backgroundColor: 'grey',
   }
 });
 
